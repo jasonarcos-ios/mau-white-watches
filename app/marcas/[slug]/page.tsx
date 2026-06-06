@@ -180,6 +180,11 @@ export default async function BrandPage({
           ← Volver
         </Link>
 
+        {/* MW logo — top right */}
+        <div className="fixed top-6 right-6 z-50">
+          <Image src="/mw-logo.png" alt="Mau White Watches" height={120} width={360} className="h-[120px] w-auto" />
+        </div>
+
         {/* Header */}
         <div className="flex flex-col items-center pt-20 pb-10 px-6">
           {/* Brand logo */}

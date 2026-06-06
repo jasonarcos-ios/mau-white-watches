@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { motion, useTransform, useSpring, useMotionValue } from "framer-motion";
 import GoldenParticles from "@/components/GoldenParticles";
 
@@ -225,6 +226,18 @@ export default function IntroAnimation() {
 
         {/* Phase 1 — Brand name */}
         <div className="absolute z-0 flex flex-col items-center justify-center text-center pointer-events-none top-1/2 -translate-y-1/2">
+          <motion.div
+            initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+            animate={
+              introPhase === "circle" && morphValue < 0.5
+                ? { opacity: 1 - morphValue * 2, y: 0, filter: "blur(0px)" }
+                : { opacity: 0, filter: "blur(10px)" }
+            }
+            transition={{ duration: 1 }}
+            className="mb-6"
+          >
+            <Image src="/mw-logo.png" alt="Mau White Watches" height={280} width={840} className="h-[280px] w-auto" />
+          </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
             animate={
@@ -238,19 +251,21 @@ export default function IntroAnimation() {
           >
             Mau White<br />Watches
           </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={
-              introPhase === "circle" && morphValue < 0.5
-                ? { opacity: 0.5 - morphValue }
-                : { opacity: 0 }
-            }
-            transition={{ duration: 1, delay: 0.2 }}
-            className="mt-4 text-xs font-bold tracking-[0.2em]"
-          >
-            <span className="scroll-explore-pulse">SCROLL TO EXPLORE</span>
-          </motion.p>
         </div>
+
+        {/* "Desliza" label — pinned near bottom, below hero text and card circle */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={
+            introPhase === "circle" && morphValue < 0.5
+              ? { opacity: 0.5 - morphValue }
+              : { opacity: 0 }
+          }
+          transition={{ duration: 1, delay: 0.2 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 text-xs font-bold tracking-[0.2em] pointer-events-none whitespace-nowrap"
+        >
+          <span className="scroll-explore-pulse">DESLIZA PARA EXPLORAR</span>
+        </motion.p>
 
         {/* Phase 2 — CTA */}
         <motion.div
@@ -263,6 +278,7 @@ export default function IntroAnimation() {
           >
             Descubre tu próximo reloj
           </h2>
+          <Image src="/mw-logo.png" alt="Mau White Watches" height={200} width={600} className="h-[200px] w-auto mb-3" />
           <p className="text-xs text-[#1a1a1a]/50 tracking-[0.2em] uppercase mb-4">
             Selecciona una marca para explorar
           </p>
