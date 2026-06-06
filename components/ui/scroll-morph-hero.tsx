@@ -123,13 +123,22 @@ export default function IntroAnimation() {
     return () => observer.disconnect();
   }, []);
 
+  // Derived mobile flag — used in JSX and kept in sync via ref for event handlers
+  const isMobile = containerSize.width > 0 && containerSize.width < 768;
+  const isMobileRef = useRef(false);
+  useEffect(() => { isMobileRef.current = isMobile; }, [isMobile]);
+
   const virtualScroll = useMotionValue(0);
   const scrollRef = useRef(0);
+
+  // Tracks current morph progress in a ref so event-handler closures can read it
+  const morphValueRef = useRef(0);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
+    // ── Desktop: mousewheel ──────────────────────────────────────────────────
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       const next = Math.min(Math.max(scrollRef.current + e.deltaY, 0), MAX_SCROLL);
@@ -137,13 +146,35 @@ export default function IntroAnimation() {
       virtualScroll.set(next);
     };
 
+    // ── Touch: Phase 1 morph (vertical) / Phase 2 arc rotation (horizontal) ─
     let touchStartY = 0;
+    let touchStartX = 0;
+
     const handleTouchStart = (e: TouchEvent) => {
       touchStartY = e.touches[0].clientY;
+      touchStartX = e.touches[0].clientX;
     };
+
     const handleTouchMove = (e: TouchEvent) => {
-      const deltaY = touchStartY - e.touches[0].clientY;
-      touchStartY = e.touches[0].clientY;
+      e.preventDefault();
+
+      const currentY = e.touches[0].clientY;
+      const currentX = e.touches[0].clientX;
+      const deltaY = touchStartY - currentY;
+      const deltaX = touchStartX - currentX;
+      touchStartY = currentY;
+      touchStartX = currentX;
+
+      // Mobile Phase 2: horizontal swipe rotates the arc
+      if (isMobileRef.current && morphValueRef.current > 0.5) {
+        // 5 virtualScroll units per px of horizontal swipe; clamped to arc range [600, MAX_SCROLL]
+        const next = Math.min(Math.max(scrollRef.current + deltaX * 5, 600), MAX_SCROLL);
+        scrollRef.current = next;
+        virtualScroll.set(next);
+        return;
+      }
+
+      // Desktop (or mobile Phase 1 fallback): vertical scroll drives morph
       const next = Math.min(Math.max(scrollRef.current + deltaY, 0), MAX_SCROLL);
       scrollRef.current = next;
       virtualScroll.set(next);
@@ -158,6 +189,13 @@ export default function IntroAnimation() {
       container.removeEventListener("touchmove", handleTouchMove);
     };
   }, [virtualScroll]);
+
+  // Tap the "DESLIZA" button on mobile → jump virtualScroll to 600 so the spring
+  // smoothly animates the morph from 0 → 1 (Phase 1 → Phase 2)
+  const handleDeslizaTap = () => {
+    scrollRef.current = 600;
+    virtualScroll.set(600);
+  };
 
   const morphProgress = useTransform(virtualScroll, [0, 600], [0, 1]);
   const smoothMorph = useSpring(morphProgress, { stiffness: 40, damping: 20 });
@@ -205,7 +243,10 @@ export default function IntroAnimation() {
   const [parallaxValue, setParallaxValue] = useState(0);
 
   useEffect(() => {
-    const u1 = smoothMorph.on("change", setMorphValue);
+    const u1 = smoothMorph.on("change", (v) => {
+      setMorphValue(v);
+      morphValueRef.current = v;
+    });
     const u2 = smoothScrollRotate.on("change", setRotateValue);
     const u3 = smoothMouseX.on("change", setParallaxValue);
     return () => { u1(); u2(); u3(); };
@@ -213,6 +254,9 @@ export default function IntroAnimation() {
 
   const contentOpacity = useTransform(smoothMorph, [0.8, 1], [0, 1]);
   const contentY = useTransform(smoothMorph, [0.8, 1], [20, 0]);
+
+  // Whether "DESLIZA" button should be shown/active
+  const deslizaVisible = introPhase === "circle" && morphValue < 0.5;
 
   return (
     <div
@@ -255,19 +299,31 @@ export default function IntroAnimation() {
           </div>
         </div>
 
-        {/* "Desliza" label — pinned near bottom, below hero text and card circle */}
-        <motion.p
+        {/* "DESLIZA PARA EXPLORAR"
+            Desktop: non-interactive label that fades out.
+            Mobile:  tappable button with pulse loop that triggers Phase 1→2 morph. */}
+        <motion.div
           initial={{ opacity: 0 }}
-          animate={
-            introPhase === "circle" && morphValue < 0.5
-              ? { opacity: 0.5 - morphValue }
-              : { opacity: 0 }
-          }
+          animate={{ opacity: deslizaVisible ? 0.5 - morphValue * 0.5 : 0 }}
           transition={{ duration: 1, delay: 0.2 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 text-xs font-bold tracking-[0.2em] pointer-events-none whitespace-nowrap"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap z-20"
+          style={{ pointerEvents: isMobile ? "auto" : "none" }}
         >
-          <span className="scroll-explore-pulse">DESLIZA PARA EXPLORAR</span>
-        </motion.p>
+          {/* Mobile: pulsing button */}
+          <motion.button
+            animate={
+              isMobile && deslizaVisible
+                ? { scale: [1, 1.05, 1] }
+                : { scale: 1 }
+            }
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            onClick={handleDeslizaTap}
+            className="text-xs font-bold tracking-[0.2em] bg-transparent border-none cursor-pointer md:cursor-default"
+            style={{ fontFamily: "inherit" }}
+          >
+            <span className="scroll-explore-pulse">DESLIZA PARA EXPLORAR</span>
+          </motion.button>
+        </motion.div>
 
         {/* Phase 2 — CTA */}
         <motion.div
@@ -305,7 +361,7 @@ export default function IntroAnimation() {
               const lineX = i * 70 - (TOTAL_IMAGES * 70) / 2;
               target = { x: lineX, y: 0, rotation: 0, scale: 1, opacity: 1 };
             } else {
-              const isMobile = containerSize.width < 768;
+              const mobile = containerSize.width < 768;
               const minDimension = Math.min(containerSize.width, containerSize.height);
               const circleRadius = Math.min(minDimension * 0.35, 350);
               const circleAngle = (i / TOTAL_IMAGES) * 360;
@@ -317,10 +373,10 @@ export default function IntroAnimation() {
               };
 
               const baseRadius = Math.min(containerSize.width, containerSize.height * 1.5);
-              const arcRadius = baseRadius * (isMobile ? 1.4 : 1.1);
-              const arcApexY = containerSize.height * (isMobile ? 0.35 : 0.25);
+              const arcRadius = baseRadius * (mobile ? 1.4 : 1.1);
+              const arcApexY = containerSize.height * (mobile ? 0.35 : 0.25);
               const arcCenterY = arcApexY + arcRadius;
-              const spreadAngle = isMobile ? 100 : 130;
+              const spreadAngle = mobile ? 100 : 130;
               const startAngle = -90 - spreadAngle / 2;
               const step = spreadAngle / (TOTAL_IMAGES - 1);
               const scrollProgress = Math.min(Math.max(rotateValue / 360, 0), 1);
@@ -331,7 +387,7 @@ export default function IntroAnimation() {
                 x: Math.cos(arcRad) * arcRadius + parallaxValue,
                 y: Math.sin(arcRad) * arcRadius + arcCenterY,
                 rotation: currentArcAngle + 90,
-                scale: isMobile ? 1.4 : 1.8,
+                scale: mobile ? 1.4 : 1.8,
               };
 
               target = {
