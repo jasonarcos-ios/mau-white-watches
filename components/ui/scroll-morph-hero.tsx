@@ -282,6 +282,25 @@ export default function IntroAnimation() {
           >
             <Image src="/mw-logo.png" alt="Mau White Watches" height={280} width={840} className="h-[180px] md:h-[280px] w-auto" />
           </motion.div>
+
+          {/* Mobile-only pulse tap button — sits directly below the logo */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: deslizaVisible ? 1 - morphValue * 2 : 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="md:hidden mt-8 pointer-events-auto"
+          >
+            <motion.button
+              animate={deslizaVisible ? { scale: [1, 1.05, 1] } : { scale: 1 }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              onClick={handleDeslizaTap}
+              className="text-xs font-bold tracking-[0.2em] bg-transparent border-none cursor-pointer"
+              style={{ fontFamily: "inherit" }}
+            >
+              <span className="scroll-explore-pulse">DESLIZA PARA EXPLORAR</span>
+            </motion.button>
+          </motion.div>
+
           <div className="hidden md:block">
             <motion.h1
               initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
@@ -299,30 +318,14 @@ export default function IntroAnimation() {
           </div>
         </div>
 
-        {/* "DESLIZA PARA EXPLORAR"
-            Desktop: non-interactive label that fades out.
-            Mobile:  tappable button with pulse loop that triggers Phase 1→2 morph. */}
+        {/* "DESLIZA PARA EXPLORAR" — desktop only, non-interactive label */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: deslizaVisible ? 0.5 - morphValue * 0.5 : 0 }}
           transition={{ duration: 1, delay: 0.2 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap z-20"
-          style={{ pointerEvents: isMobile ? "auto" : "none" }}
+          className="hidden md:block absolute bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap z-20 pointer-events-none"
         >
-          {/* Mobile: pulsing button */}
-          <motion.button
-            animate={
-              isMobile && deslizaVisible
-                ? { scale: [1, 1.05, 1] }
-                : { scale: 1 }
-            }
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-            onClick={handleDeslizaTap}
-            className="text-xs font-bold tracking-[0.2em] bg-transparent border-none cursor-pointer md:cursor-default"
-            style={{ fontFamily: "inherit" }}
-          >
-            <span className="scroll-explore-pulse">DESLIZA PARA EXPLORAR</span>
-          </motion.button>
+          <span className="scroll-explore-pulse text-xs font-bold tracking-[0.2em]">DESLIZA PARA EXPLORAR</span>
         </motion.div>
 
         {/* Phase 2 — CTA */}
@@ -374,7 +377,7 @@ export default function IntroAnimation() {
 
               const baseRadius = Math.min(containerSize.width, containerSize.height * 1.5);
               const arcRadius = baseRadius * (mobile ? 1.4 : 1.1);
-              const arcApexY = containerSize.height * (mobile ? 0.35 : 0.25);
+              const arcApexY = containerSize.height * (mobile ? 0.1 : 0.25);
               const arcCenterY = arcApexY + arcRadius;
               const spreadAngle = mobile ? 100 : 130;
               const startAngle = -90 - spreadAngle / 2;
