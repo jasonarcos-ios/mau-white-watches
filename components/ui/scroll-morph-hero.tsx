@@ -225,7 +225,7 @@ export default function IntroAnimation() {
       <div className="relative flex h-full w-full flex-col items-center justify-center" style={{ zIndex: 1 }}>
 
         {/* Phase 1 — Brand name */}
-        <div className="absolute z-0 flex flex-col items-center justify-center text-center pointer-events-none top-1/2 -translate-y-1/2">
+        <div className="absolute z-10 flex flex-col items-center justify-center text-center pointer-events-none top-1/2 -translate-y-1/2">
           <motion.div
             initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
             animate={
@@ -234,23 +234,25 @@ export default function IntroAnimation() {
                 : { opacity: 0, filter: "blur(10px)" }
             }
             transition={{ duration: 1 }}
-            className="mb-6"
+            className="mb-0 md:mb-6"
           >
-            <Image src="/mw-logo.png" alt="Mau White Watches" height={280} width={840} className="h-[280px] w-auto" />
+            <Image src="/mw-logo.png" alt="Mau White Watches" height={280} width={840} className="h-[180px] md:h-[280px] w-auto" />
           </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-            animate={
-              introPhase === "circle" && morphValue < 0.5
-                ? { opacity: 1 - morphValue * 2, y: 0, filter: "blur(0px)" }
-                : { opacity: 0, filter: "blur(10px)" }
-            }
-            transition={{ duration: 1 }}
-            className="text-3xl md:text-5xl font-bold tracking-widest text-[#1a1a1a] text-center"
-            style={{ fontFamily: "var(--font-playfair), 'Playfair Display', serif" }}
-          >
-            Mau White<br />Watches
-          </motion.h1>
+          <div className="hidden md:block">
+            <motion.h1
+              initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+              animate={
+                introPhase === "circle" && morphValue < 0.5
+                  ? { opacity: 1 - morphValue * 2, y: 0, filter: "blur(0px)" }
+                  : { opacity: 0, filter: "blur(10px)" }
+              }
+              transition={{ duration: 1 }}
+              className="text-3xl md:text-5xl font-bold tracking-widest text-[#1a1a1a] text-center"
+              style={{ fontFamily: "var(--font-playfair), 'Playfair Display', serif" }}
+            >
+              Mau White<br />Watches
+            </motion.h1>
+          </div>
         </div>
 
         {/* "Desliza" label — pinned near bottom, below hero text and card circle */}
