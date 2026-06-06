@@ -1,26 +1,171 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --gold: #C9A84C;
+  --gold-light: #E2C47A;
+  --gold-dark: #9A7A2E;
+  --black: #050505;
+  --black-card: #0D0D0D;
+  --black-glass: rgba(13, 13, 13, 0.6);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  cursor: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  background: #050505;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #050505;
+  color: #f0f0f0;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+::-webkit-scrollbar-thumb {
+  background: #C9A84C;
+  border-radius: 2px;
+}
+
+/* Gold gradient text utility */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #C9A84C 0%, #E2C47A 50%, #C9A84C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glassmorphism */
+.glass-card {
+  background: rgba(13, 13, 13, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(201, 168, 76, 0.15);
+}
+
+/* Particle canvas */
+#particle-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Watch 3D */
+.watch-container {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+/* Gold shimmer animation */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.gold-shimmer {
+  background: linear-gradient(90deg, #9A7A2E 0%, #C9A84C 30%, #E2C47A 50%, #C9A84C 70%, #9A7A2E 100%);
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow pulse */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(201, 168, 76, 0.3), 0 0 60px rgba(201, 168, 76, 0.1); }
+  50% { box-shadow: 0 0 40px rgba(201, 168, 76, 0.5), 0 0 100px rgba(201, 168, 76, 0.2); }
+}
+
+.glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* Legacy CSS watch model float (WatchModel.tsx) */
+@keyframes watch-float {
+  0%, 100% { transform: rotateY(-8deg) rotateX(5deg) translateY(0px); }
+  50% { transform: rotateY(8deg) rotateX(-3deg) translateY(-15px); }
+}
+
+.watch-float {
+  animation: watch-float 6s ease-in-out infinite;
+}
+
+/* SCROLL TO EXPLORE — simple gold opacity pulse */
+@keyframes opacity-pulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1;   }
+}
+
+.scroll-explore-pulse {
+  color: #C9A84C;
+  animation: opacity-pulse 2s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* Hero carousel — float: translateY -10px ↔ 10px, 3s */
+@keyframes hero-float {
+  0%, 100% { transform: translateY(-10px); }
+  50%       { transform: translateY(10px);  }
+}
+
+/* Hero carousel — rock: rotateY -15deg ↔ 15deg, 4s alternate (8s full pendulum) */
+@keyframes hero-rock {
+  from { transform: rotateY(-15deg); }
+  to   { transform: rotateY(15deg);  }
+}
+
+/* Scroll indicator */
+@keyframes scroll-bounce {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50% { transform: translateY(8px); opacity: 0.4; }
+}
+
+.scroll-bounce {
+  animation: scroll-bounce 2s ease-in-out infinite;
+}
+
+/* Ambient orb */
+@keyframes orb-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 15px) scale(0.95); }
+}
+
+.orb-drift {
+  animation: orb-drift 8s ease-in-out infinite;
+}
+
+/* Line accent */
+.gold-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #C9A84C, transparent);
+}
+
+/* Card hover glow */
+.watch-card {
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+              box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+              border-color 0.4s ease;
+}
+
+.watch-card:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 30px 80px rgba(201, 168, 76, 0.2), 0 0 40px rgba(201, 168, 76, 0.08);
+  border-color: rgba(201, 168, 76, 0.5);
+}
+
+/* Mobile cursor hide */
+@media (hover: none) {
+  * { cursor: auto; }
+  .custom-cursor { display: none; }
 }
