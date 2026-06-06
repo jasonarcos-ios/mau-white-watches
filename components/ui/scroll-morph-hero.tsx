@@ -63,6 +63,8 @@ function FlipCard({ logo, brandName, slug, index, target }: FlipCardProps) {
         height: IMG_HEIGHT,
         transformStyle: "preserve-3d",
         perspective: "1000px",
+        touchAction: "manipulation",
+        pointerEvents: "auto",
       }}
       className="cursor-pointer group"
       onClick={() => router.push(`/marcas/${slug}`)}
@@ -376,13 +378,10 @@ export default function IntroAnimation() {
               };
 
               const baseRadius = Math.min(containerSize.width, containerSize.height * 1.5);
-              // Mobile: 0.55× keeps edge cards within screen width (±0.574×radius from center).
-              // Desktop: unchanged at 1.1×.
-              const arcRadius = baseRadius * (mobile ? 0.55 : 1.1);
+              const arcRadius = baseRadius * (mobile ? 1.4 : 1.1);
               const arcApexY = containerSize.height * (mobile ? 0.1 : 0.25);
               const arcCenterY = arcApexY + arcRadius;
-              // Narrower mobile spread so edge cards don't reach past screen edges.
-              const spreadAngle = mobile ? 70 : 130;
+              const spreadAngle = mobile ? 100 : 130;
               const startAngle = -90 - spreadAngle / 2;
               const step = spreadAngle / (TOTAL_IMAGES - 1);
               const scrollProgress = Math.min(Math.max(rotateValue / 360, 0), 1);
@@ -393,7 +392,7 @@ export default function IntroAnimation() {
                 x: Math.cos(arcRad) * arcRadius + parallaxValue,
                 y: Math.sin(arcRad) * arcRadius + arcCenterY,
                 rotation: currentArcAngle + 90,
-                scale: mobile ? 0.85 : 1.8,
+                scale: mobile ? 1.4 : 1.8,
               };
 
               target = {
